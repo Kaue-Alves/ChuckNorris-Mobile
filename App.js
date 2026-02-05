@@ -1,48 +1,47 @@
-import { StatusBar } from 'expo-status-bar';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Api } from './services/api';
-import { useState } from 'react';
+import { StatusBar } from "expo-status-bar";
+import { Ionicons } from "@expo/vector-icons";
+import { NavigationContainer } from "@react-navigation/native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+
+import HomeScreen from "./screens/HomeScreen";
+import SavedScreen from "./screens/SavedScreen";
+import { JokesProvider } from "./context/JokesContext";
+
+const Tab = createBottomTabNavigator();
 
 export default function App() {
-
-  const [joke, setJoke] = useState("");  
-  const [loading, setLoading] = useState(false);
-
-  const ApiService = new Api();
-
-  async function handleGetJoke() {
-    setLoading(true);
-    setJoke("")
-    
-    try {
-      const joke = await ApiService.getChuckJoke();
-      const translatedJoke = await ApiService.translateWithAI(joke);
-      setJoke(translatedJoke);
-    } catch (error) { 
-      console.error("Erro ao buscar piada: ", error);
-    } finally {
-      setLoading(false);
-    }
-  }  
-
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <Pressable onPress={handleGetJoke} disabled={loading}>
-        <Text>Press Me</Text>
-      </Pressable>
-      <Text>{joke}</Text>
-    
-      <StatusBar style="auto" />
-    </View>
-  );
+    return (
+        <JokesProvider>
+            <NavigationContainer>
+                <StatusBar style="light" />
+                <Tab.Navigator
+                    screenOptions={({ route }) => ({
+                        headerShown: false,
+                        tabBarActiveTintColor: "#B9C2FF",
+                        tabBarInactiveTintColor: "rgba(232, 236, 255, 0.55)",
+                        tabBarStyle: {
+                            backgroundColor: "#0B1020",
+                            borderTopColor: "rgba(185, 194, 255, 0.16)",
+                        },
+                        tabBarIcon: ({ color, size }) => {
+                            const name =
+                                route.name === "Piada"
+                                    ? "sparkles"
+                                    : "bookmark";
+                            return (
+                                <Ionicons
+                                    name={name}
+                                    size={size}
+                                    color={color}
+                                />
+                            );
+                        },
+                    })}
+                >
+                    <Tab.Screen name="Piada" component={HomeScreen} />
+                    <Tab.Screen name="Salvas" component={SavedScreen} />
+                </Tab.Navigator>
+            </NavigationContainer>
+        </JokesProvider>
+    );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

@@ -1,5 +1,5 @@
-// Expo carrega este arquivo em ambiente Node (build/dev), então aqui pode usar dotenv.
-import 'dotenv/config';
+// Expo executa este arquivo em ambiente Node (CJS), então aqui pode usar dotenv.
+require("dotenv").config();
 
 module.exports = ({ config }) => ({
     ...config,
