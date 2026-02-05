@@ -28,9 +28,6 @@ export async function ensureDbInitialized() {
                 translatedText TEXT NOT NULL,
                 createdAt INTEGER NOT NULL
             );
-
-            CREATE INDEX IF NOT EXISTS idx_${TABLE_NAME}_createdAt
-            ON ${TABLE_NAME} (createdAt DESC);
         `);
 
         return db;
