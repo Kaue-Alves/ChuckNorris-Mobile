@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
         paddingBottom: 14,
     },
     header: {
-        marginTop: 8,
+        marginTop: 18,
         marginBottom: 14,
     },
     badge: {
