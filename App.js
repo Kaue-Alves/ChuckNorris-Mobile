@@ -16,7 +16,8 @@ export default function App() {
     
     try {
       const joke = await ApiService.getChuckJoke();
-      setJoke(joke);
+      const translatedJoke = await ApiService.translateWithAI(joke);
+      setJoke(translatedJoke);
     } catch (error) { 
       console.error("Erro ao buscar piada: ", error);
     } finally {
