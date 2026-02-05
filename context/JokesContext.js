@@ -4,6 +4,7 @@ import {
     deleteSavedJoke,
     insertSavedJoke,
     listSavedJokes,
+    updateSavedJokeFavorite,
 } from "../services/db";
 
 const JokesContext = createContext(null);
@@ -55,6 +56,7 @@ export function JokesProvider({ children }) {
                         ? translatedText.trim()
                         : "",
                 createdAt,
+                isFavorite: false,
             };
 
             try {
@@ -80,11 +82,33 @@ export function JokesProvider({ children }) {
             }
         }
 
+        async function toggleFavorite(idOrEnglishText) {
+            const id = makeJokeId(idOrEnglishText);
+            if (!id) return;
+
+            const current = savedJokes.find((j) => j.id === id);
+            if (!current) return;
+
+            const nextFavorite = !current.isFavorite;
+
+            try {
+                await updateSavedJokeFavorite(id, nextFavorite);
+                setSavedJokes((prev) =>
+                    prev.map((j) =>
+                        j.id === id ? { ...j, isFavorite: nextFavorite } : j,
+                    ),
+                );
+            } catch (err) {
+                console.error("Falha ao atualizar favorito no SQLite", err);
+            }
+        }
+
         return {
             savedJokes,
             isSaved,
             saveJoke,
             deleteJoke,
+            toggleFavorite,
         };
     }, [savedJokes]);
 

@@ -18,7 +18,7 @@ function formatCount(n) {
 }
 
 export default function SavedScreen() {
-    const { savedJokes, deleteJoke } = useJokes();
+    const { savedJokes, deleteJoke, toggleFavorite } = useJokes();
     const [showEnglishForId, setShowEnglishForId] = useState(null);
 
     const headerText = useMemo(
@@ -73,6 +73,7 @@ export default function SavedScreen() {
                     )}
                     renderItem={({ item }) => {
                         const showingEnglish = showEnglishForId === item.id;
+                        const favorite = !!item.isFavorite;
 
                         return (
                             <Pressable
@@ -98,22 +99,53 @@ export default function SavedScreen() {
                                         </Text>
                                     </View>
 
-                                    <Pressable
-                                        onPress={() => handleDelete(item.id)}
-                                        hitSlop={10}
-                                        style={({ pressed }) => [
-                                            styles.trashButton,
-                                            pressed
-                                                ? styles.trashPressed
-                                                : null,
-                                        ]}
-                                    >
-                                        <Ionicons
-                                            name="trash"
-                                            size={18}
-                                            color="#FFB4B4"
-                                        />
-                                    </Pressable>
+                                    <View style={styles.cardActions}>
+                                        <Pressable
+                                            onPress={() =>
+                                                toggleFavorite(item.id)
+                                            }
+                                            hitSlop={10}
+                                            style={({ pressed }) => [
+                                                styles.starButton,
+                                                pressed
+                                                    ? styles.starPressed
+                                                    : null,
+                                            ]}
+                                        >
+                                            <Ionicons
+                                                name={
+                                                    favorite
+                                                        ? "star"
+                                                        : "star-outline"
+                                                }
+                                                size={18}
+                                                color={
+                                                    favorite
+                                                        ? "#FFD54A"
+                                                        : "rgba(232, 236, 255, 0.55)"
+                                                }
+                                            />
+                                        </Pressable>
+
+                                        <Pressable
+                                            onPress={() =>
+                                                handleDelete(item.id)
+                                            }
+                                            hitSlop={10}
+                                            style={({ pressed }) => [
+                                                styles.trashButton,
+                                                pressed
+                                                    ? styles.trashPressed
+                                                    : null,
+                                            ]}
+                                        >
+                                            <Ionicons
+                                                name="trash"
+                                                size={18}
+                                                color="#FFB4B4"
+                                            />
+                                        </Pressable>
+                                    </View>
                                 </View>
 
                                 <Text style={styles.jokeText}>
@@ -208,6 +240,25 @@ const styles = StyleSheet.create({
         color: "#0B1020",
         fontWeight: "900",
         fontSize: 12,
+    },
+    cardActions: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 10,
+    },
+    starButton: {
+        width: 38,
+        height: 38,
+        borderRadius: 12,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "rgba(185, 194, 255, 0.08)",
+        borderColor: "rgba(185, 194, 255, 0.22)",
+        borderWidth: 1,
+    },
+    starPressed: {
+        opacity: 0.9,
+        transform: [{ scale: 0.98 }],
     },
     trashButton: {
         width: 38,

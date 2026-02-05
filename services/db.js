@@ -6,6 +6,14 @@ const TABLE_NAME = "saved_jokes";
 let dbPromise;
 let initPromise;
 
+async function ensureColumnExists(db, tableName, columnName, columnSql) {
+    const columns = await db.getAllAsync(`PRAGMA table_info(${tableName});`);
+    const hasColumn = columns.some((c) => c.name === columnName);
+    if (hasColumn) return;
+
+    await db.execAsync(`ALTER TABLE ${tableName} ADD COLUMN ${columnSql};`);
+}
+
 async function getDb() {
     if (!dbPromise) {
         dbPromise = SQLite.openDatabaseAsync(DB_NAME);
@@ -26,7 +34,8 @@ export async function ensureDbInitialized() {
                 id TEXT PRIMARY KEY NOT NULL,
                 englishText TEXT NOT NULL,
                 translatedText TEXT NOT NULL,
-                createdAt INTEGER NOT NULL
+                createdAt INTEGER NOT NULL,
+                isFavorite INTEGER NOT NULL DEFAULT 0
             );
         `);
 
@@ -39,7 +48,7 @@ export async function ensureDbInitialized() {
 export async function listSavedJokes() {
     const db = await ensureDbInitialized();
     const rows = await db.getAllAsync(
-        `SELECT id, englishText, translatedText, createdAt
+        `SELECT id, englishText, translatedText, createdAt, isFavorite
          FROM ${TABLE_NAME}
          ORDER BY createdAt DESC`,
     );
@@ -49,6 +58,7 @@ export async function listSavedJokes() {
         englishText: r.englishText,
         translatedText: r.translatedText,
         createdAt: r.createdAt,
+        isFavorite: !!r.isFavorite,
     }));
 }
 
@@ -57,13 +67,24 @@ export async function insertSavedJoke({
     englishText,
     translatedText,
     createdAt,
+    isFavorite,
 }) {
     const db = await ensureDbInitialized();
 
     await db.runAsync(
-        `INSERT OR IGNORE INTO ${TABLE_NAME} (id, englishText, translatedText, createdAt)
-         VALUES (?, ?, ?, ?)`,
-        [id, englishText, translatedText, createdAt],
+        `INSERT OR IGNORE INTO ${TABLE_NAME} (id, englishText, translatedText, createdAt, isFavorite)
+         VALUES (?, ?, ?, ?, ?)`,
+        [id, englishText, translatedText, createdAt, isFavorite ? 1 : 0],
+    );
+}
+
+export async function updateSavedJokeFavorite(id, isFavorite) {
+    const db = await ensureDbInitialized();
+    await db.runAsync(
+        `UPDATE ${TABLE_NAME}
+         SET isFavorite = ?
+         WHERE id = ?`,
+        [isFavorite ? 1 : 0, id],
     );
 }
 
